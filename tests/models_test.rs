@@ -12,7 +12,7 @@ fn test_note_from_markdown() {
 > — Aadit Sheth (@aaditsh) [April 7, 2025](https://twitter.com/aaditsh/status/1909332848152105301?ref_src=twsrc%5Etfw)
 "#;
     let filename = "Aadit Sheth.md";
-    let note = Note::from_markdown(markdown_content, filename, 5);
+    let note = Note::from_markdown(markdown_content, filename, 5, &Config::default());
 
     assert_eq!(note.title, "Aadit Sheth");
     assert!(note.excerpt.contains("This guy literally turned WhatsApp into an AI assistant"));

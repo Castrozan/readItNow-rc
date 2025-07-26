@@ -2,14 +2,14 @@ mod models;
 mod ui;
 mod app;
 mod vault;
-mod kitty;
 
 use std::{io, time::Duration};
 use crossterm::{event::{self, Event, KeyCode, KeyEventKind, KeyModifiers}, terminal::{self, EnterAlternateScreen, LeaveAlternateScreen}, ExecutableCommand};
-use ratatui::{prelude::*, widgets::{block::*, Paragraph}};
-use crate::models::{Note, Config};
-use crate::ui::{NoteList, render_note_card};
+use ratatui::prelude::*;
+use crate::models::Config;
+use crate::ui::render_note_card;
 use crate::app::App;
+use open;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Setup terminal
@@ -31,7 +31,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Application loop
     loop {
         terminal.draw(|frame| {
-            let area = frame.size();
+            let area = frame.area();
             
             // Render notes in a grid layout
             let num_cols = 2;

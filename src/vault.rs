@@ -1,5 +1,28 @@
-use std::{fs, io, path::PathBuf};
+use std::{fs, io, path::{Path, PathBuf}};
 use crate::models::{Note, Config};
+use reqwest::blocking::get;
+use image::{ImageOutputFormat,io::Reader};
+
+pub fn download_and_cache_thumbnail(url: &str, cache_dir: &Path) -> io::Result<String> {
+    let response = get(url).map_err(|e| io::Error::new(io::ErrorKind::Other, e))?;
+    let bytes = response.bytes().map_err(|e| io::Error::new(io::ErrorKind::Other, e))?;
+    let img = Reader::new(io::Cursor::new(bytes))
+        .with_guessed_format()
+        .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))?
+        .decode()
+        .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))?;
+        
+    fs::create_dir_all(cache_dir)?;
+
+    let file_name = format!("{:x}.jpeg", md5::compute(url));
+    let file_path = cache_dir.join(file_name);
+    
+    let mut file = fs::File::create(&file_path)?;
+    img.write_to(&mut file, ImageOutputFormat::Jpeg(80))
+        .map_err(|e| io::Error::new(io::ErrorKind::Other, e))?;
+
+    Ok(file_path.to_string_lossy().to_string())
+}
 
 pub fn scan_vault(config: &Config) -> io::Result<Vec<Note>> {
     let vault_path = PathBuf::from(&config.vault_path);
@@ -16,7 +39,7 @@ pub fn scan_vault(config: &Config) -> io::Result<Vec<Note>> {
         if path.is_file() && path.extension().map_or(false, |ext| ext == "md") {
             let content = fs::read_to_string(&path)?;
             let filename = path.file_stem().and_then(|s| s.to_str()).unwrap_or("Untitled").to_string();
-            notes.push(Note::from_markdown(&content, &filename, config.excerpt_lines));
+            notes.push(Note::from_markdown(&content, &filename, config.excerpt_lines, config));
         }
     }
 

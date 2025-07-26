@@ -3,6 +3,7 @@ use regex::Regex;
 use std::fs;
 use std::io;
 use std::path::Path;
+use crate::vault::download_and_cache_thumbnail;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Note {
@@ -28,7 +29,7 @@ impl Default for Note {
 }
 
 impl Note {
-    pub fn from_markdown(content: &str, filename: &str, excerpt_lines: usize) -> Self {
+    pub fn from_markdown(content: &str, filename: &str, excerpt_lines: usize, config: &Config) -> Self {
         let mut note = Note::default();
 
         // Title from filename
@@ -55,14 +56,20 @@ impl Note {
 
         // Thumbnail Detection
         if let Some(url) = &note.url {
+            let cache_dir = Path::new(&config.thumbnail_cache);
             if url.contains("twitter.com") || url.contains("t.co") {
                 // For Twitter, we'll just use a placeholder for now, actual image fetching will be complex
-                note.thumbnail = Some("twitter_placeholder.png".to_string());
+                if let Ok(path) = download_and_cache_thumbnail(url, cache_dir) {
+                    note.thumbnail = Some(path);
+                }
             } else if url.contains("youtube.com") || url.contains("youtu.be") {
                 let youtube_re = Regex::new(r"(?:https?://)?(?:www\.)?(?:m\.)?(?:youtube\.com|youtu\.be)/(?:watch\?v=|embed/|v/|)([^\s&]+)").unwrap();
                 if let Some(cap) = youtube_re.captures(url) {
                     if let Some(video_id) = cap.get(1) {
-                        note.thumbnail = Some(format!("https://img.youtube.com/vi/{}/mqdefault.jpg", video_id.as_str()));
+                        let thumbnail_url = format!("https://img.youtube.com/vi/{}/mqdefault.jpg", video_id.as_str());
+                        if let Ok(path) = download_and_cache_thumbnail(&thumbnail_url, cache_dir) {
+                            note.thumbnail = Some(path);
+                        }
                     }
                 }
             }

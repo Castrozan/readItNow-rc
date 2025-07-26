@@ -1,4 +1,4 @@
-use ratatui::{prelude::*, widgets::{block::*, Paragraph, Borders}};
+use ratatui::{prelude::*, widgets::{block::*, Borders, Paragraph}};
 use crate::models::Note;
 use ratatui_image::{picker::Picker, StatefulImage, protocol::StatefulProtocol};
 use std::path::PathBuf;
@@ -62,29 +62,18 @@ pub fn render_note_card(
     frame.render_widget(Paragraph::new(note.excerpt.as_str()), chunks[1]);
 }
 
-pub struct NoteList<
-    'a,
-> {
+pub struct NoteList<'a> {
     notes: &'a [Note],
     selected_note_index: usize,
-    scroll_state: u16,
 }
 
-impl<
-    'a,
-> NoteList<'a> {
+impl<'a> NoteList<'a> {
     pub fn new(notes: &'a [Note], selected_note_index: usize) -> Self {
-        Self { notes, selected_note_index, scroll_state: 0 }
-    }
-
-    pub fn scroll(&mut self, delta: i16) {
-        self.scroll_state = self.scroll_state.saturating_add_signed(delta);
+        Self { notes, selected_note_index }
     }
 }
 
-impl<
-    'a,
-> Widget for NoteList<'a> {
+impl<'a> Widget for NoteList<'a> {
     fn render(self, area: Rect, _buf: &mut Buffer) {
         let num_cols = 2;
         let card_height = 10; // Approximate height of a note card

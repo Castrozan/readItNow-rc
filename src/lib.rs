@@ -1,7 +1,6 @@
-pub mod models;
 pub mod app;
-pub mod vault;
+pub mod models;
 pub mod ui;
-pub mod kitty;
+pub mod vault;
 
 
