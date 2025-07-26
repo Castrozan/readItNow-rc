@@ -36,6 +36,7 @@ pub fn render_note_card(
             let image_widget = StatefulImage::new(None);
             frame.render_stateful_widget(image_widget, chunks[0], image_protocol);
         } else if image_path.exists() {
+            // TODO: the image should be reloaded on screen update, not on every render
             match image::open(&image_path) {
                 Ok(dyn_img) => {
                     let mut picker = Picker::new((8, 12));
