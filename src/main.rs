@@ -23,75 +23,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         default_config
     });
 
-    // Mock notes for testing
-    let mock_notes = vec![
-        Note {
-            title: "My First Note".to_string(),
-            excerpt: "This is the first note excerpt. It has some content to display.".to_string(),
-            tags: vec!["rust".to_string(), "ratatui".to_string()],
-            url: Some("https://example.com/first".to_string()),
-            thumbnail: Some("./GvBwuhjXgAAJn3M.jpeg".to_string()),
-            read: false,
-        },
-        Note {
-            title: "Another Interesting Read".to_string(),
-            excerpt: "Here\"s another note with a slightly longer excerpt to see how it wraps.".to_string(),
-            tags: vec!["programming".to_string()],
-            url: Some("https://example.com/second".to_string()),
-            thumbnail: None,
-            read: true,
-        },
-        Note {
-            title: "A Third Note".to_string(),
-            excerpt: "Short and sweet.".to_string(),
-            tags: vec!["quick_read".to_string()],
-            url: None,
-            thumbnail: None,
-            read: false,
-        },
-        Note {
-            title: "Fourth Note".to_string(),
-            excerpt: "This is the fourth note excerpt.".to_string(),
-            tags: vec!["test".to_string()],
-            url: None,
-            thumbnail: None,
-            read: false,
-        },
-        Note {
-            title: "Fifth Note".to_string(),
-            excerpt: "This is the fifth note excerpt.".to_string(),
-            tags: vec!["example".to_string()],
-            url: None,
-            thumbnail: None,
-            read: false,
-        },
-        Note {
-            title: "Sixth Note".to_string(),
-            excerpt: "This is the sixth note excerpt.".to_string(),
-            tags: vec!["demo".to_string()],
-            url: None,
-            thumbnail: None,
-            read: false,
-        },
-        Note {
-            title: "Seventh Note".to_string(),
-            excerpt: "This is the seventh note excerpt.".to_string(),
-            tags: vec!["new".to_string()],
-            url: None,
-            thumbnail: None,
-            read: false,
-        },
-        Note {
-            title: "Eighth Note".to_string(),
-            excerpt: "This is the eighth note excerpt.".to_string(),
-            tags: vec!["latest".to_string()],
-            url: None,
-            thumbnail: None,
-            read: false,
-        },
-    ];
+    // Load notes from the vault
+    let notes = vault::scan_vault(&config).expect("Failed to load notes from the vault");
 
-    let mut app = App::new(mock_notes);
+    let mut app = App::new(notes);
 
     // Application loop
     loop {
