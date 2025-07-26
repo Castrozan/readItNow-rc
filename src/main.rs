@@ -8,7 +8,7 @@ use std::{io, time::Duration};
 use crossterm::{event::{self, Event, KeyCode, KeyEventKind, KeyModifiers}, terminal::{self, EnterAlternateScreen, LeaveAlternateScreen}, ExecutableCommand};
 use ratatui::{prelude::*, widgets::{block::*, Paragraph}};
 use crate::models::{Note, Config};
-use crate::ui::NoteList;
+use crate::ui::{NoteList, render_note_card};
 use crate::app::App;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -30,7 +30,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             excerpt: "This is the first note excerpt. It has some content to display.".to_string(),
             tags: vec!["rust".to_string(), "ratatui".to_string()],
             url: Some("https://example.com/first".to_string()),
-            thumbnail: None,
+            thumbnail: Some("./GvBwuhjXgAAJn3M.jpeg".to_string()),
             read: false,
         },
         Note {
@@ -46,7 +46,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             excerpt: "Short and sweet.".to_string(),
             tags: vec!["quick_read".to_string()],
             url: None,
-            thumbnail: Some("/home/zanoni/.cache/readitnow/thumbnails/1276097f38c4dcd0dc9810445bfa9277.jpg".to_string()),
+            thumbnail: None,
             read: false,
         },
         Note {
@@ -97,8 +97,36 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     loop {
         terminal.draw(|frame| {
             let area = frame.size();
-            let note_list = NoteList::new(&app.notes, app.selected_note_index);
-            frame.render_widget(note_list, area);
+            
+            // Render notes in a grid layout
+            let num_cols = 2;
+            let card_height = 10;
+            let visible_rows = area.height / card_height;
+            let visible_notes_count = (visible_rows as usize * num_cols).min(app.notes.len());
+            let notes_to_render = &app.notes[0..visible_notes_count];
+
+            let chunks = Layout::default()
+                .direction(Direction::Horizontal)
+                .constraints([
+                    Constraint::Percentage(50),
+                    Constraint::Percentage(50),
+                ])
+                .split(area);
+
+            for (i, note) in notes_to_render.iter().enumerate() {
+                let col = i % num_cols;
+                let row = i / num_cols;
+
+                let card_area = Rect::new(
+                    chunks[col].x,
+                    chunks[col].y + (row as u16 * card_height),
+                    chunks[col].width,
+                    card_height,
+                );
+
+                let is_selected = i == app.selected_note_index;
+                render_note_card(frame, card_area, note, is_selected);
+            }
         })?;
 
         if event::poll(Duration::from_millis(250))? {
@@ -106,24 +134,20 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 if key.kind == KeyEventKind::Press {
                     match key.code {
                         KeyCode::Char(c) if c.to_string() == config.keybindings.quit => break,
-                        KeyCode::Char(c) if c.to_string() == "j" => app.next_two_notes(),
-                        KeyCode::Char(c) if c.to_string() == "k" => app.previous_two_notes(),
-                        KeyCode::Char(c) if c.to_string() == "h" => app.previous_note(),
-                        KeyCode::Char(c) if c.to_string() == "l" => app.next_note(),
-                        KeyCode::Up => app.previous_two_notes(),
-                        KeyCode::Down => app.next_two_notes(),
-                        KeyCode::Left => app.previous_note(),
-                        KeyCode::Right => app.next_note(),
+                        KeyCode::Char(c) if c.to_string() == config.keybindings.down => app.next_note(),
+                        KeyCode::Char(c) if c.to_string() == config.keybindings.up => app.previous_note(),
+                        KeyCode::Char(c) if c.to_string() == config.keybindings.left => app.previous_note(), // For now, left/right act as up/down
+                        KeyCode::Char(c) if c.to_string() == config.keybindings.right => app.next_note(), // For now, left/right act as up/down
                         KeyCode::PageDown => app.next_page(),
                         KeyCode::PageUp => app.previous_page(),
                         KeyCode::Enter => {
                             if key.modifiers.contains(KeyModifiers::SHIFT) {
                                 // Shift+Enter: Open file
-                                // TODO: open file in default editor, now its opening in kitty
                                 if let Some(note) = app.notes.get(app.selected_note_index) {
                                     let _ = open::that(format!("{}/{}.md", config.vault_path, note.title));
                                 }
                             } else {
+                                // Enter: Open URL
                                 if let Some(note) = app.notes.get(app.selected_note_index) {
                                     if let Some(url) = &note.url {
                                         let _ = open::that(url);
@@ -132,7 +156,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                             }
                         },
                         KeyCode::Char(c) if c.to_string() == "r" => {
-                            // TODO: test this
                             if let Some(note) = app.notes.get_mut(app.selected_note_index) {
                                 let _ = vault::toggle_read_status(note, &config);
                             }
@@ -144,6 +167,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
     }
 
+    // Restore terminal
     restore_terminal()?;
     Ok(())
 }
@@ -161,5 +185,3 @@ fn restore_terminal() -> Result<(), Box<dyn std::error::Error>> {
     stdout.execute(LeaveAlternateScreen)?;
     Ok(())
 }
-
-
