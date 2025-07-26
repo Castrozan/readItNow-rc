@@ -16,7 +16,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut terminal = setup_terminal()?;
 
     // Load config
-    let config_path = "/home/ubuntu/.config/readitnow/config.yaml"; // TODO: Make this configurable
+    let config_path = "/home/zanoni/.config/readitnow/config.yaml"; // TODO: Make this configurable
     let config = Config::load(config_path).unwrap_or_else(|_| {
         let default_config = Config::default();
         default_config.save(config_path).expect("Failed to save default config");

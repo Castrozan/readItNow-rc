@@ -1,1 +1,7 @@
 /target
+
+# devenv/direnv
+.devenv/
+.direnv/
+devenv.local.nix
+devenv.lock
