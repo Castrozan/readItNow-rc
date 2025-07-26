@@ -106,10 +106,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 if key.kind == KeyEventKind::Press {
                     match key.code {
                         KeyCode::Char(c) if c.to_string() == config.keybindings.quit => break,
-                        KeyCode::Char(c) if c.to_string() == "j" => app.next_note(),
-                        KeyCode::Char(c) if c.to_string() == "k" => app.previous_note(),
-                        KeyCode::Char(c) if c.to_string() == "h" => app.previous_note(), // For now, left/right act as up/down
-                        KeyCode::Char(c) if c.to_string() == "l" => app.next_note(), // For now, left/right act as up/down
+                        KeyCode::Char(c) if c.to_string() == "j" => app.next_two_notes(),
+                        KeyCode::Char(c) if c.to_string() == "k" => app.previous_two_notes(),
+                        KeyCode::Char(c) if c.to_string() == "h" => app.previous_note(),
+                        KeyCode::Char(c) if c.to_string() == "l" => app.next_note(),
                         KeyCode::Up => app.previous_two_notes(),
                         KeyCode::Down => app.next_two_notes(),
                         KeyCode::Left => app.previous_note(),
@@ -144,7 +144,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
     }
 
-    // Restore terminal
     restore_terminal()?;
     Ok(())
 }
