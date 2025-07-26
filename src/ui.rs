@@ -23,7 +23,7 @@ pub fn render_note_card(
         .direction(Direction::Vertical)
         .constraints([
             Constraint::Length(7), // Increased height for thumbnail
-            Constraint::Min(0),    // For excerpt
+            Constraint::Min(5),    // For excerpt
         ])
         .split(inner_area);
 

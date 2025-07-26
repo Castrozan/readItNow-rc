@@ -3,7 +3,7 @@ use ratatui_image::protocol::StatefulProtocol;
 use std::collections::HashMap;
 use std::path::PathBuf;
 
-pub const PAGE_SIZE: usize = 4;
+pub const PAGE_SIZE: usize = 6;
 
 pub struct App {
     pub notes: Vec<Note>,
