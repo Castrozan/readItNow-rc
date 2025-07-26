@@ -1,8 +1,12 @@
 use crate::models::Note;
+use ratatui_image::protocol::StatefulProtocol;
+use std::collections::HashMap;
+use std::path::PathBuf;
 
 pub struct App {
     pub notes: Vec<Note>,
     pub selected_note_index: usize,
+    pub image_cache: HashMap<PathBuf, Box<dyn StatefulProtocol>>,
 }
 
 impl App {
@@ -10,6 +14,7 @@ impl App {
         App {
             notes,
             selected_note_index: 0,
+            image_cache: HashMap::new(),
         }
     }
 

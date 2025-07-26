@@ -1,16 +1,21 @@
 use ratatui::{prelude::*, widgets::{block::*, Paragraph, Borders}};
 use crate::models::Note;
-use ratatui_image::{picker::Picker, StatefulImage};
+use ratatui_image::{picker::Picker, StatefulImage, protocol::StatefulProtocol};
 use std::path::PathBuf;
-use std::fs;
-use std::io;
+use std::collections::HashMap;
 
-pub fn render_note_card(frame: &mut Frame, area: Rect, note: &Note, is_selected: bool) {
+pub fn render_note_card(
+    frame: &mut Frame,
+    area: Rect,
+    note: &Note,
+    is_selected: bool,
+    image_cache: &mut HashMap<PathBuf, Box<dyn StatefulProtocol>>,
+) {
     let block = Block::default()
         .borders(Borders::ALL)
         .title(note.title.as_str())
         .border_style(if is_selected { Style::default().fg(Color::Yellow) } else { Style::default() });
-    
+
     let inner_area = block.inner(area);
     frame.render_widget(block, area);
 
@@ -25,14 +30,20 @@ pub fn render_note_card(frame: &mut Frame, area: Rect, note: &Note, is_selected:
     // Thumbnail or Placeholder
     if let Some(thumbnail_path) = &note.thumbnail {
         let image_path = PathBuf::from(thumbnail_path);
-        if image_path.exists() {
+
+        if image_cache.contains_key(&image_path) {
+            let image_protocol = image_cache.get_mut(&image_path).unwrap();
+            let image_widget = StatefulImage::new(None);
+            frame.render_stateful_widget(image_widget, chunks[0], image_protocol);
+        } else if image_path.exists() {
             match image::open(&image_path) {
                 Ok(dyn_img) => {
-                    // Create a picker with dummy font size for now
-                    let mut picker = Picker::new((8, 12)); // Common font size
+                    let mut picker = Picker::new((8, 12));
                     let mut image_protocol = picker.new_resize_protocol(dyn_img);
-                    let image_widget = StatefulImage::new(None); // No background color
+                    let image_widget = StatefulImage::new(None);
                     frame.render_stateful_widget(image_widget, chunks[0], &mut image_protocol);
+                    image_cache.insert(image_path, image_protocol);
+                    println!("Image loaded and cached:");
                 }
                 Err(e) => {
                     println!("Error loading image {:?}: {}", image_path, e);
@@ -73,7 +84,7 @@ impl<
 impl<
     'a,
 > Widget for NoteList<'a> {
-    fn render(self, area: Rect, buf: &mut Buffer) {
+    fn render(self, area: Rect, _buf: &mut Buffer) {
         let num_cols = 2;
         let card_height = 10; // Approximate height of a note card
 
@@ -90,18 +101,18 @@ impl<
             ])
             .split(area);
 
-        for (i, note) in notes_to_render.iter().enumerate() {
+        for (i, _note) in notes_to_render.iter().enumerate() {
             let col = i % num_cols;
             let row = i / num_cols;
 
-            let card_area = Rect::new(
+            let _card_area = Rect::new(
                 chunks[col].x,
                 chunks[col].y + (row as u16 * card_height),
                 chunks[col].width,
                 card_height,
             );
 
-            let is_selected = i == self.selected_note_index;
+            let _is_selected = i == self.selected_note_index;
             // We need to pass the frame from the main loop to the NoteList render method
             // For now, we'll just render directly to the buffer.
             // This is a temporary workaround until the main loop can pass the frame.

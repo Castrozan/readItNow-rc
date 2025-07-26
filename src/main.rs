@@ -125,7 +125,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 );
 
                 let is_selected = i == app.selected_note_index;
-                render_note_card(frame, card_area, note, is_selected);
+                render_note_card(frame, card_area, note, is_selected, &mut app.image_cache);
             }
         })?;
 
