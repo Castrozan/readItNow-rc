@@ -41,6 +41,9 @@ pub fn scan_vault(config: &Config) -> io::Result<Vec<Note>> {
     files_with_mod_time.sort_by(|a, b| b.1.cmp(&a.1));
 
     let notes: Vec<Note> = files_with_mod_time.into_iter()
+    // TODO: this is limiting the amount of notes to be loaded
+    // for some reason loading all notes is very slow
+    // we can load only the 4 notes at a time and then load the next 4
         .take(config.max_notes)
         .filter_map(|(path, _)| {
             let content = fs::read_to_string(&path).ok()?;
