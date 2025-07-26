@@ -102,7 +102,7 @@ pub struct Keybindings {
 impl Default for Config {
     fn default() -> Self {
         Config {
-            vault_path: "/home/you/vault/ReadItLater Inbox".to_string(),
+            vault_path: "/home/zanoni/vault/ReadItLater Inbox".to_string(),
             max_notes: 20,
             excerpt_lines: 5,
             keybindings: Keybindings {
