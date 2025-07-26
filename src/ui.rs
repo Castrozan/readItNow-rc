@@ -1,4 +1,4 @@
-use ratatui::{prelude::*, widgets::{block::*, Borders, Paragraph}};
+use ratatui::{prelude::*, widgets::{block::*, Borders, Paragraph, Wrap}};
 use crate::models::Note;
 use ratatui_image::{picker::Picker, StatefulImage, protocol::StatefulProtocol};
 use std::path::PathBuf;
@@ -20,10 +20,10 @@ pub fn render_note_card(
     frame.render_widget(block, area);
 
     let chunks = Layout::default()
-        .direction(Direction::Vertical)
+        .direction(Direction::Horizontal)
         .constraints([
-            Constraint::Length(7), // Increased height for thumbnail
-            Constraint::Min(5),    // For excerpt
+            Constraint::Percentage(50),
+            Constraint::Percentage(50),
         ])
         .split(inner_area);
 
@@ -59,5 +59,6 @@ pub fn render_note_card(
     }
 
     // Excerpt
-    frame.render_widget(Paragraph::new(note.excerpt.as_str()), chunks[1]);
+    let excerpt = Paragraph::new(note.excerpt.as_str()).wrap(Wrap { trim: true });
+    frame.render_widget(excerpt, chunks[1]);
 }
