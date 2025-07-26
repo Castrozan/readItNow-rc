@@ -46,7 +46,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             excerpt: "Short and sweet.".to_string(),
             tags: vec!["quick_read".to_string()],
             url: None,
-            thumbnail: None,
+            thumbnail: Some("/home/zanoni/.cache/readitnow/thumbnails/1276097f38c4dcd0dc9810445bfa9277.jpg".to_string()),
             read: false,
         },
         Note {
