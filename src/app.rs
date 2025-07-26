@@ -19,9 +19,21 @@ impl App {
         }
     }
 
+    pub fn next_two_notes(&mut self) {
+        if !self.notes.is_empty() {
+            self.selected_note_index = (self.selected_note_index + 2) % self.notes.len();
+        }
+    }
+
     pub fn previous_note(&mut self) {
         if !self.notes.is_empty() {
             self.selected_note_index = (self.selected_note_index + self.notes.len() - 1) % self.notes.len();
+        }
+    }
+
+    pub fn previous_two_notes(&mut self) {
+        if !self.notes.is_empty() {
+            self.selected_note_index = (self.selected_note_index + self.notes.len() - 2) % self.notes.len();
         }
     }
 
