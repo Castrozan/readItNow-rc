@@ -134,20 +134,24 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 if key.kind == KeyEventKind::Press {
                     match key.code {
                         KeyCode::Char(c) if c.to_string() == config.keybindings.quit => break,
-                        KeyCode::Char(c) if c.to_string() == config.keybindings.down => app.next_note(),
-                        KeyCode::Char(c) if c.to_string() == config.keybindings.up => app.previous_note(),
-                        KeyCode::Char(c) if c.to_string() == config.keybindings.left => app.previous_note(), // For now, left/right act as up/down
-                        KeyCode::Char(c) if c.to_string() == config.keybindings.right => app.next_note(), // For now, left/right act as up/down
+                        KeyCode::Char(c) if c.to_string() == "j" => app.next_two_notes(),
+                        KeyCode::Char(c) if c.to_string() == "k" => app.previous_two_notes(),
+                        KeyCode::Char(c) if c.to_string() == "h" => app.previous_note(),
+                        KeyCode::Char(c) if c.to_string() == "l" => app.next_note(),
+                        KeyCode::Up => app.previous_two_notes(),
+                        KeyCode::Down => app.next_two_notes(),
+                        KeyCode::Left => app.previous_note(),
+                        KeyCode::Right => app.next_note(),
                         KeyCode::PageDown => app.next_page(),
                         KeyCode::PageUp => app.previous_page(),
                         KeyCode::Enter => {
                             if key.modifiers.contains(KeyModifiers::SHIFT) {
                                 // Shift+Enter: Open file
+                                // TODO: open file in default editor, now its opening in kitty
                                 if let Some(note) = app.notes.get(app.selected_note_index) {
                                     let _ = open::that(format!("{}/{}.md", config.vault_path, note.title));
                                 }
                             } else {
-                                // Enter: Open URL
                                 if let Some(note) = app.notes.get(app.selected_note_index) {
                                     if let Some(url) = &note.url {
                                         let _ = open::that(url);
@@ -156,6 +160,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                             }
                         },
                         KeyCode::Char(c) if c.to_string() == "r" => {
+                            // TODO: test this
                             if let Some(note) = app.notes.get_mut(app.selected_note_index) {
                                 let _ = vault::toggle_read_status(note, &config);
                             }
