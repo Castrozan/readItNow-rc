@@ -5,7 +5,7 @@ use std::io;
 use std::path::Path;
 use crate::vault::download_and_cache_thumbnail;
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Note {
     pub title: String,
     pub excerpt: String,
@@ -13,6 +13,19 @@ pub struct Note {
     pub url: Option<String>,
     pub thumbnail: Option<String>,
     pub read: bool,
+}
+
+impl Clone for Note {
+    fn clone(&self) -> Self {
+        Note {
+            title: self.title.clone(),
+            excerpt: self.excerpt.clone(),
+            tags: self.tags.clone(),
+            url: self.url.clone(),
+            thumbnail: self.thumbnail.clone(),
+            read: self.read,
+        }
+    }
 }
 
 impl Default for Note {
@@ -58,6 +71,7 @@ impl Note {
         if let Some(url) = &note.url {
             let cache_dir = Path::new(&config.thumbnail_cache);
             if url.contains("twitter.com") || url.contains("t.co") {
+                // TODO: fix x thumbnails are not right
                 // For Twitter, we'll just use a placeholder for now, actual image fetching will be complex
                 if let Ok(path) = download_and_cache_thumbnail(url, cache_dir) {
                     note.thumbnail = Some(path);

@@ -1,4 +1,4 @@
-use std::{fs, io, path::{Path, PathBuf}};
+use std::{fs, io, path::{Path, PathBuf}, time::SystemTime};
 use crate::models::{Note, Config};
 use reqwest::blocking::get;
 use image::{ImageOutputFormat,io::Reader};
@@ -26,34 +26,29 @@ pub fn download_and_cache_thumbnail(url: &str, cache_dir: &Path) -> io::Result<S
 
 pub fn scan_vault(config: &Config) -> io::Result<Vec<Note>> {
     let vault_path = PathBuf::from(&config.vault_path);
-    let mut notes = Vec::new();
 
     if !vault_path.exists() || !vault_path.is_dir() {
         return Err(io::Error::new(io::ErrorKind::NotFound, "Vault path does not exist or is not a directory"));
     }
 
-    for entry in fs::read_dir(&vault_path)? {
-        let entry = entry?;
-        let path = entry.path();
+    let mut files_with_mod_time: Vec<(PathBuf, SystemTime)> = fs::read_dir(&vault_path)?
+        .filter_map(Result::ok)
+        .map(|entry| entry.path())
+        .filter(|path| path.is_file() && path.extension().map_or(false, |ext| ext == "md"))
+        .filter_map(|path| fs::metadata(&path).ok().and_then(|meta| meta.modified().ok()).map(|mod_time| (path, mod_time)))
+        .collect();
 
-        if path.is_file() && path.extension().map_or(false, |ext| ext == "md") {
-            let content = fs::read_to_string(&path)?;
+    files_with_mod_time.sort_by(|a, b| b.1.cmp(&a.1));
+
+    let notes: Vec<Note> = files_with_mod_time.into_iter()
+        .take(config.max_notes)
+        .filter_map(|(path, _)| {
+            let content = fs::read_to_string(&path).ok()?;
             let filename = path.file_stem().and_then(|s| s.to_str()).unwrap_or("Untitled").to_string();
-            notes.push(Note::from_markdown(&content, &filename, config.excerpt_lines, config));
-        }
-    }
-
-    // Sort notes by modification time (newest first)
-    notes.sort_by(|a, b| {
-        let a_path = vault_path.join(format!("{}.md", a.title));
-        let b_path = vault_path.join(format!("{}.md", b.title));
-
-        let a_modified = fs::metadata(&a_path).and_then(|m| m.modified()).ok();
-        let b_modified = fs::metadata(&b_path).and_then(|m| m.modified()).ok();
-
-        b_modified.cmp(&a_modified)
-    });
-
+            Some(Note::from_markdown(&content, &filename, config.excerpt_lines, config))
+        })
+        .collect();
+    
     Ok(notes)
 }
 

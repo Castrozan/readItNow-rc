@@ -36,32 +36,30 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             // Render notes in a grid layout
             let num_cols = 2;
             let card_height = 10;
-            let visible_rows = area.height / card_height;
-            let visible_notes_count = (visible_rows as usize * num_cols).min(app.notes.len());
-            let notes_to_render = &app.notes[0..visible_notes_count];
-
-            let chunks = Layout::default()
-                .direction(Direction::Horizontal)
-                .constraints([
-                    Constraint::Percentage(50),
-                    Constraint::Percentage(50),
-                ])
-                .split(area);
-
-            for (i, note) in notes_to_render.iter().enumerate() {
-                let col = i % num_cols;
-                let row = i / num_cols;
-
-                let card_area = Rect::new(
-                    chunks[col].x,
-                    chunks[col].y + (row as u16 * card_height),
-                    chunks[col].width,
-                    card_height,
-                );
-
-                let is_selected = i == app.selected_note_index;
-                render_note_card(frame, card_area, note, is_selected, &mut app.image_cache);
-            }
+            let notes_to_render = app.notes_on_current_page().to_vec();
+ 
+             let chunks = Layout::default()
+                 .direction(Direction::Horizontal)
+                 .constraints([
+                     Constraint::Percentage(50),
+                     Constraint::Percentage(50),
+                 ])
+                 .split(area);
+ 
+             for (i, note) in notes_to_render.iter().enumerate() {
+                 let col = i % num_cols;
+                 let row = i / num_cols;
+ 
+                 let card_area = Rect::new(
+                     chunks[col].x,
+                     chunks[col].y + (row as u16 * card_height),
+                     chunks[col].width,
+                     card_height,
+                 );
+ 
+                 let is_selected = i == app.selected_note_index;
+                 render_note_card(frame, card_area, note, is_selected, &mut app.image_cache);
+             }
         })?;
 
         if event::poll(Duration::from_millis(250))? {
@@ -83,11 +81,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                             if key.modifiers.contains(KeyModifiers::SHIFT) {
                                 // Shift+Enter: Open file
                                 // TODO: open file in default editor, now its opening in kitty
-                                if let Some(note) = app.notes.get(app.selected_note_index) {
+                                if let Some(note) = app.selected_note() {
                                     let _ = open::that(format!("{}/{}.md", config.vault_path, note.title));
                                 }
                             } else {
-                                if let Some(note) = app.notes.get(app.selected_note_index) {
+                                if let Some(note) = app.selected_note() {
                                     if let Some(url) = &note.url {
                                         let _ = open::that(url);
                                     }
@@ -96,7 +94,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                         },
                         KeyCode::Char(c) if c.to_string() == "r" => {
                             // TODO: test this
-                            if let Some(note) = app.notes.get_mut(app.selected_note_index) {
+                            if let Some(note) = app.selected_note_mut() {
                                 let _ = vault::toggle_read_status(note, &config);
                             }
                         },
