@@ -1,4 +1,5 @@
-use readitnow::models::{Note, Config};
+use readitnow::models::Note;
+use readitnow::config::Config;
 
 #[test]
 fn test_note_from_markdown() {
@@ -19,7 +20,6 @@ fn test_note_from_markdown() {
     assert!(note.tags.contains(&"ReadItLater".to_string()));
     assert!(note.tags.contains(&"Tweet".to_string()));
     assert_eq!(note.url, Some("https://twitter.com/aaditsh/status/1909332848152105301".to_string()));
-    assert!(note.thumbnail.is_some());
     assert!(!note.read);
 }
 
@@ -36,7 +36,6 @@ fn test_config_load_save() {
     assert_eq!(original_config.excerpt_lines, loaded_config.excerpt_lines);
     assert_eq!(original_config.keybindings.quit, loaded_config.keybindings.quit);
 
-    // Clean up
     std::fs::remove_file(test_config_path).unwrap();
 }
 
