@@ -12,18 +12,10 @@ use crate::app::App;
 use open;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    // Setup terminal
     let mut terminal = setup_terminal()?;
 
-    // Load config
-    let config_path = "/home/zanoni/.config/readitnow/config.yaml"; // TODO: Make this configurable
-    let config = Config::load(config_path).unwrap_or_else(|_| {
-        let default_config = Config::default();
-        default_config.save(config_path).expect("Failed to save default config");
-        default_config
-    });
+    let config = load_config();
 
-    // Load notes from the vault
     let notes = vault::scan_vault(&config).expect("Failed to load notes from the vault");
 
     let mut app = App::new(notes);
@@ -31,35 +23,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Application loop
     loop {
         terminal.draw(|frame| {
-            let area = frame.area();
-            
-            // Render notes in a grid layout
-            let num_cols = 2;
-            let card_height = 10;
-            let notes_to_render = app.notes_on_current_page().to_vec();
- 
-             let chunks = Layout::default()
-                 .direction(Direction::Horizontal)
-                 .constraints([
-                     Constraint::Percentage(50),
-                     Constraint::Percentage(50),
-                 ])
-                 .split(area);
- 
-             for (i, note) in notes_to_render.iter().enumerate() {
-                 let col = i % num_cols;
-                 let row = i / num_cols;
- 
-                 let card_area = Rect::new(
-                     chunks[col].x,
-                     chunks[col].y + (row as u16 * card_height),
-                     chunks[col].width,
-                     card_height,
-                 );
- 
-                 let is_selected = i == app.selected_note_index;
-                 render_note_card(frame, card_area, note, is_selected, &mut app.image_cache);
-             }
+            render_app(&mut app, frame);
         })?;
 
         if event::poll(Duration::from_millis(250))? {
@@ -105,9 +69,48 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
     }
 
-    // Restore terminal
     restore_terminal()?;
     Ok(())
+}
+
+fn render_app(app: &mut App, frame: &mut Frame<'_>) {
+    let area = frame.area();
+    // TODO: make this configurable
+    let num_cols = 2;
+    let card_height = 10;
+    let notes_to_render = app.notes_on_current_page().to_vec();
+    let chunks = Layout::default()
+         .direction(Direction::Horizontal)
+         .constraints([
+             Constraint::Percentage(50),
+             Constraint::Percentage(50),
+         ])
+         .split(area);
+    for (i, note) in notes_to_render.iter().enumerate() {
+         let col = i % num_cols;
+         let row = i / num_cols;
+ 
+         let card_area = Rect::new(
+             chunks[col].x,
+             chunks[col].y + (row as u16 * card_height),
+             chunks[col].width,
+             card_height,
+         );
+ 
+         let is_selected = i == app.selected_note_index;
+         render_note_card(frame, card_area, note, is_selected, &mut app.image_cache);
+     }
+}
+
+fn load_config() -> Config {
+    // TODO: look for the config on $XDG_CONFIG_HOME
+    let config_path = "/home/zanoni/.config/readitnow/config.yaml";
+    let config = Config::load(config_path).unwrap_or_else(|_| {
+        let default_config = Config::default();
+        default_config.save(config_path).expect("Failed to save default config");
+        default_config
+    });
+    config
 }
 
 fn setup_terminal() -> Result<Terminal<impl Backend>, Box<dyn std::error::Error>> {
