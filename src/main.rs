@@ -2,14 +2,14 @@ mod models;
 mod ui;
 mod app;
 mod vault;
+mod keybindings;
 
 use std::{io, time::Duration};
-use crossterm::{event::{self, Event, KeyCode, KeyEventKind, KeyModifiers}, terminal::{self, EnterAlternateScreen, LeaveAlternateScreen}, ExecutableCommand};
+use crossterm::{event::{self, Event}, terminal::{self, EnterAlternateScreen, LeaveAlternateScreen}, ExecutableCommand};
 use ratatui::prelude::*;
 use crate::models::Config;
 use crate::ui::render_note_card;
 use crate::app::App;
-use open;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut terminal = setup_terminal()?;
@@ -28,42 +28,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
         if event::poll(Duration::from_millis(250))? {
             if let Event::Key(key) = event::read()? {
-                if key.kind == KeyEventKind::Press {
-                    match key.code {
-                        KeyCode::Char(c) if c.to_string() == config.keybindings.quit => break,
-                        KeyCode::Char(c) if c.to_string() == "j" => app.next_two_notes(),
-                        KeyCode::Char(c) if c.to_string() == "k" => app.previous_two_notes(),
-                        KeyCode::Char(c) if c.to_string() == "h" => app.previous_note(),
-                        KeyCode::Char(c) if c.to_string() == "l" => app.next_note(),
-                        KeyCode::Up => app.previous_two_notes(),
-                        KeyCode::Down => app.next_two_notes(),
-                        KeyCode::Left => app.previous_note(),
-                        KeyCode::Right => app.next_note(),
-                        KeyCode::PageDown => app.next_page(),
-                        KeyCode::PageUp => app.previous_page(),
-                        KeyCode::Enter => {
-                            if key.modifiers.contains(KeyModifiers::SHIFT) {
-                                // Shift+Enter: Open file
-                                // TODO: open file in default editor, now its opening in kitty
-                                if let Some(note) = app.selected_note() {
-                                    let _ = open::that(format!("{}/{}.md", config.vault_path, note.title));
-                                }
-                            } else {
-                                if let Some(note) = app.selected_note() {
-                                    if let Some(url) = &note.url {
-                                        let _ = open::that(url);
-                                    }
-                                }
-                            }
-                        },
-                        KeyCode::Char(c) if c.to_string() == "r" => {
-                            // TODO: test this
-                            if let Some(note) = app.selected_note_mut() {
-                                let _ = vault::toggle_read_status(note, &config);
-                            }
-                        },
-                        _ => {},
-                    }
+                if keybindings::handle_key_event(key, &mut app, &config)
+                    == keybindings::AppAction::Quit
+                {
+                    break;
                 }
             }
         }

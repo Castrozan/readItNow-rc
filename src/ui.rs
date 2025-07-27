@@ -44,10 +44,8 @@ pub fn render_note_card(
                     let image_widget = StatefulImage::new(None);
                     frame.render_stateful_widget(image_widget, chunks[0], &mut image_protocol);
                     image_cache.insert(image_path, image_protocol);
-                    println!("Image loaded and cached:");
                 }
                 Err(e) => {
-                    println!("Error loading image {:?}: {}", image_path, e);
                     frame.render_widget(Paragraph::new("📷 Error loading image"), chunks[0]);
                 }
             }
