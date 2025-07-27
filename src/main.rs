@@ -3,11 +3,12 @@ mod ui;
 mod app;
 mod vault;
 mod keybindings;
+mod config;
 
 use std::{io, time::Duration};
 use crossterm::{event::{self, Event}, terminal::{self, EnterAlternateScreen, LeaveAlternateScreen}, ExecutableCommand};
 use ratatui::prelude::*;
-use crate::models::Config;
+use crate::config::Config;
 use crate::ui::Renderer;
 use crate::app::App;
 

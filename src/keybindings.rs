@@ -1,5 +1,5 @@
 use crate::app::App;
-use crate::models::Config;
+use crate::config::Config;
 use crate::vault;
 use crossterm::event::{KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
 use open;

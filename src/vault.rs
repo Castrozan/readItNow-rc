@@ -1,5 +1,6 @@
 use std::{fs, io, path::{Path, PathBuf}, time::SystemTime};
-use crate::models::{Note, Config};
+use crate::models::Note;
+use crate::config::Config;
 use reqwest::blocking::get;
 use image::{ImageOutputFormat,io::Reader};
 
