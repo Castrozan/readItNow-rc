@@ -1,9 +1,9 @@
-use serde::{Deserialize, Serialize};
-use regex::Regex;
-use std::fs;
-use std::io;
-use std::path::Path;
 use crate::vault::download_and_cache_thumbnail;
+use directories::ProjectDirs;
+use regex::Regex;
+use serde::{Deserialize, Serialize};
+use serde_yaml;
+use std::{fs, io, path::Path};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Note {
@@ -143,6 +143,30 @@ impl Default for Config {
 }
 
 impl Config {
+    pub fn load_or_default() -> Self {
+        if let Some(proj_dirs) = ProjectDirs::from("com", "zanoni", "readitnow") {
+            let config_dir = proj_dirs.config_dir();
+            let config_path = config_dir.join("config.yaml");
+
+            if config_path.exists() {
+                if let Ok(config) = Self::load(&config_path) {
+                    return config;
+                }
+            }
+        }
+        
+        // Fallback to default and try to save it
+        let default_config = Config::default();
+        if let Some(proj_dirs) = ProjectDirs::from("com", "zanoni", "readitnow") {
+            let config_dir = proj_dirs.config_dir();
+            fs::create_dir_all(config_dir).ok();
+            let config_path = config_dir.join("config.yaml");
+            default_config.save(&config_path).ok();
+        }
+        
+        default_config
+    }
+
     pub fn load<P: AsRef<Path>>(path: P) -> io::Result<Self> {
         let config_str = fs::read_to_string(path)?;
         serde_yaml::from_str(&config_str)

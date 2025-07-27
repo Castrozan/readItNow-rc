@@ -14,7 +14,7 @@ use crate::app::App;
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut terminal = setup_terminal()?;
 
-    let config = load_config();
+    let config = Config::load_or_default();
 
     let notes = vault::scan_vault(&config).expect("Failed to load notes from the vault");
 
@@ -41,17 +41,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     restore_terminal()?;
     Ok(())
-}
-
-fn load_config() -> Config {
-    // TODO: look for the config on $XDG_CONFIG_HOME
-    let config_path = "/home/zanoni/.config/readitnow/config.yaml";
-    let config = Config::load(config_path).unwrap_or_else(|_| {
-        let default_config = Config::default();
-        default_config.save(config_path).expect("Failed to save default config");
-        default_config
-    });
-    config
 }
 
 fn setup_terminal() -> Result<Terminal<impl Backend>, Box<dyn std::error::Error>> {
