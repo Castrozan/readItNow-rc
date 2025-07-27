@@ -10,6 +10,7 @@ pub enum AppAction {
     Quit,
 }
 
+// TODO: use the keybindings from the config
 pub fn handle_key_event(key: KeyEvent, app: &mut App, config: &Config) -> AppAction {
     if key.kind == KeyEventKind::Press {
         match key.code {
