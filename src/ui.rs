@@ -17,7 +17,6 @@ impl Renderer {
         // TODO: make this configurable
         let num_cols = 2;
         let num_rows = 2;
-        let card_height = 10;
         let notes_to_render = app.notes_on_current_page().to_vec();
         let chunks = Layout::default()
             .direction(Direction::Horizontal)
@@ -26,6 +25,8 @@ impl Renderer {
                 Constraint::Percentage(50),
             ])
             .split(area);
+        let card_height = chunks[0].height / num_rows as u16;
+
         for (i, note) in notes_to_render.iter().enumerate().take(num_cols * num_rows) {
             let col = i % num_cols;
             let row = i / num_cols;
