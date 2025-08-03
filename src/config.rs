@@ -42,7 +42,7 @@ impl Default for Config {
                 page_down: "pagedown".to_string(),
                 quit: "q".to_string(),
             },
-            thumbnail_cache: "~/.cache/readitnow/thumbnails".to_string(),
+            thumbnail_cache: "/home/zanoni/.cache/readitnow/thumbnails".to_string(),
         }
     }
 }
