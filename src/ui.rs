@@ -16,6 +16,7 @@ impl Renderer {
         let area = frame.area();
         // TODO: make this configurable
         let num_cols = 2;
+        let num_rows = 2;
         let card_height = 10;
         let notes_to_render = app.notes_on_current_page().to_vec();
         let chunks = Layout::default()
@@ -25,7 +26,7 @@ impl Renderer {
                 Constraint::Percentage(50),
             ])
             .split(area);
-        for (i, note) in notes_to_render.iter().enumerate() {
+        for (i, note) in notes_to_render.iter().enumerate().take(num_cols * num_rows) {
             let col = i % num_cols;
             let row = i / num_cols;
 

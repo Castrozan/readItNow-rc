@@ -3,7 +3,8 @@ use ratatui_image::protocol::StatefulProtocol;
 use std::collections::HashMap;
 use std::path::PathBuf;
 
-pub const PAGE_SIZE: usize = 6;
+// TODO: fix this, it affects the number of notes rendered in the UI
+pub const PAGE_SIZE: usize = 4;
 
 pub struct App {
     pub notes: Vec<Note>,
