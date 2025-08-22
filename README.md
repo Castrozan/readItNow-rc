@@ -2,6 +2,8 @@
 
 A terminal-based application for managing and browsing your ["Read It Later"](https://github.com/DominikPieper/obsidian-ReadItLater) notes with a clean, keyboard-driven interface.
 
+![Preview](./static/preview.png)
+
 ## Features
 
 - **Two-column pagination UI**: Easily browse your notes.
