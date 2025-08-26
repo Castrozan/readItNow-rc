@@ -4,6 +4,7 @@ mod app;
 mod vault;
 mod keybindings;
 mod config;
+mod markdown_processor;
 
 use std::{io, time::Duration};
 use crossterm::{event::{self, Event}, terminal::{self, EnterAlternateScreen, LeaveAlternateScreen}, ExecutableCommand};

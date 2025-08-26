@@ -1,4 +1,5 @@
 use crate::vault::download_and_cache_thumbnail;
+use crate::markdown_processor::{MarkdownProcessor, MarkdownProcessorConfig};
 use regex::Regex;
 use serde::{Deserialize, Serialize};
 use std::path::Path;
@@ -47,11 +48,27 @@ impl Note {
         // Title from filename
         note.title = filename.replace(".md", "");
 
-        // Excerpt
+        // Excerpt - clean Obsidian syntax before creating excerpt
+        let processor_config = MarkdownProcessorConfig {
+            preserve_formatting: false,
+            convert_headings: false, // Keep headings minimal in excerpts
+            include_link_text: true,
+            max_line_length: 0,
+        };
+        let processor = MarkdownProcessor::with_config(processor_config);
+        
+        // First, get raw excerpt lines
         let mut lines = content.lines().filter(|l| !l.trim().is_empty());
-        note.excerpt = lines.by_ref().take(excerpt_lines).collect::<Vec<&str>>().join("\n");
-        if note.excerpt.is_empty() {
+        let raw_excerpt = lines.by_ref().take(excerpt_lines).collect::<Vec<&str>>().join("\n");
+        
+        if raw_excerpt.is_empty() {
             note.excerpt = "No content available".to_string();
+        } else {
+            // Clean the excerpt using the markdown processor
+            note.excerpt = processor.process(&raw_excerpt);
+            if note.excerpt.trim().is_empty() {
+                note.excerpt = "No content available".to_string();
+            }
         }
 
         // Tags
