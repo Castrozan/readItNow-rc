@@ -31,8 +31,8 @@ impl MarkdownProcessor {
 
         result = self.remove_yaml_frontmatter(&result);
         result = self.remove_dataview_queries(&result);
-        result = self.process_wiki_links(&result);
         result = self.remove_embeds(&result);
+        result = self.process_wiki_links(&result);
         result = self.remove_tags(&result);
         result = self.remove_block_references(&result);
 
@@ -64,7 +64,7 @@ impl MarkdownProcessor {
     }
 
     fn remove_tags(&self, text: &str) -> String {
-        self.obsidian_regex.tags.replace_all(text, "$1").to_string()
+        self.obsidian_regex.tags.replace_all(text, "").to_string()
     }
 
     fn remove_block_references(&self, text: &str) -> String {

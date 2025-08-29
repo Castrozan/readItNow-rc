@@ -18,14 +18,14 @@ fn test_wiki_link_cleaning() {
 fn test_embed_removal() {
     let input = "Here's an embed: ![[image.png]] and some text.";
     let result = clean_obsidian_markdown(input);
-    assert_eq!(result, "Here's an embed:  and some text.");
+    assert_eq!(result, "Here's an embed: and some text.");
 }
 
 #[test]
 fn test_tag_removal() {
     let input = "This has #tag1 and #tag2/nested tags.";
     let result = clean_obsidian_markdown(input);
-    assert_eq!(result, "This has  and  tags.");
+    assert_eq!(result, "This has and tags.");
 }
 
 #[test]

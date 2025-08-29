@@ -14,9 +14,9 @@ impl ObsidianRegex {
         Self {
             wiki_links: Regex::new(r"\[\[([^\]|]+)(?:\|([^\]]+))?\]\]").unwrap(),
             embeds: Regex::new(r"!\[\[([^\]]+)\]\]").unwrap(),
-            tags: Regex::new(r"(?:^|[^\w/#])#([a-zA-Z][\w/-]*)").unwrap(),
-            yaml_frontmatter: Regex::new(r"^---\s*\n.*?\n---\s*\n").unwrap(),
-            dataview_queries: Regex::new(r"```dataview\s.*?\s```").unwrap(),
+            tags: Regex::new(r"#[a-zA-Z][\w/-]*").unwrap(),
+            yaml_frontmatter: Regex::new(r"(?s)^---.*?---\s*\n").unwrap(),
+            dataview_queries: Regex::new(r"(?s)```dataview.*?```").unwrap(),
             block_references: Regex::new(r"\s*\^[\w-]+\s*$").unwrap(),
         }
     }
