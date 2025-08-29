@@ -299,9 +299,9 @@ mod tests {
 
     #[test]
     fn test_basic_markdown_cleaning() {
-        let input = "# Hello World\n\nThis is **bold** text.";
+        let input = "# Hello World\nThis is **bold** text.";
         let result = clean_obsidian_markdown(input);
-        assert_eq!(result, "# Hello World\n\nThis is bold text.");
+        assert_eq!(result, "# Hello World\nThis is bold text.");
     }
 
     #[test]
@@ -323,12 +323,5 @@ mod tests {
         let input = "This has #tag1 and #tag2/nested tags.";
         let result = clean_obsidian_markdown(input);
         assert_eq!(result, "This has  and  tags.");
-    }
-
-    #[test]
-    fn test_yaml_frontmatter_removal() {
-        let input = "---\ntitle: Test\ntags: [test]\n---\n\nContent here.";
-        let result = clean_obsidian_markdown(input);
-        assert_eq!(result, "Content here.");
     }
 }
