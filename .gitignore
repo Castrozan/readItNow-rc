@@ -6,3 +6,4 @@
 devenv.local.nix
 devenv.lock
 .devenv.flake.lock
+.devenv.flake.nix
